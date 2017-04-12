@@ -7,7 +7,7 @@ use GuzzleHttp\Psr7\Request;
 use Experian\PreQualificationReport;
 
 class Experian {
-	private $client = new Client();
+	private $client;
 
 	private $config;
 
@@ -17,6 +17,7 @@ class Experian {
 
 	public function __construct($config){
 		$this->config=$config;
+		$this->client = new Client();
 	}
 
 	public function set($key,$value){
