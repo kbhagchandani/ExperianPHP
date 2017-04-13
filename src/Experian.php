@@ -2,9 +2,15 @@
 namespace Experian;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
+
+use Experian\XML;
+use Experian\Response;
 
 use Experian\PreQualificationReport;
+
+use Experian\Exceptions\InvalidAuth;
+use Experian\Exceptions\Unauthorized;
+use Experian\Exceptions\InvalidApp;
 
 class Experian {
 	private $client;
@@ -24,52 +30,6 @@ class Experian {
 		$this->data[$key]=$value;
 	}
 
-	function xmlEncode($mixed, $domElement=null, $DOMDocument=null) {
-		if (is_null($DOMDocument)) {
-			$DOMDocument =new \DOMDocument;
-			$DOMDocument->formatOutput = true;
-			$this->xmlEncode($mixed, $DOMDocument, $DOMDocument);
-			return $DOMDocument->saveXML();
-		}
-		else {
-			// To cope with embedded objects 
-			if (is_object($mixed)) {
-			  $mixed = get_object_vars($mixed);
-			}
-			if (is_array($mixed)) {
-				foreach ($mixed as $index => $mixedElement) {
-					if (is_int($index)) {
-						if ($index === 0) {
-							$node = $domElement;
-						}
-						else {
-							$node = $DOMDocument->createElement($domElement->tagName);
-							$domElement->parentNode->appendChild($node);
-						}
-					}
-					else {
-						$plural = $DOMDocument->createElement($index);
-						$domElement->appendChild($plural);
-						$node = $plural;
-						if(isset($mixedElement['attributes'])){
-							$attributes=$mixedElement['attributes'];
-							foreach($attributes as $attribute => $value){
-								$plural->setAttribute($attribute,$value);
-							}
-							unset($mixedElement['attributes']);
-						}
-					}
-
-					$this->xmlEncode($mixedElement, $node, $DOMDocument);
-				}
-			}
-			else {
-				$mixed = is_bool($mixed) ? ($mixed ? 'true' : 'false') : $mixed;
-				$domElement->appendChild($DOMDocument->createTextNode($mixed));
-			}
-		}
-	}
-
 	private function getResponse($products){
 		$request=[
 			'NetConnectRequest'=>[
@@ -87,9 +47,33 @@ class Experian {
 				]
 			]
 		];
-		$xml=$this->xmlEncode($request);
-		$request=urlencode(preg_replace('~>\s*\n\s*<~', '><', $xml));
-		return $request;
+		$xml=XML::encode($request);
+		$response = $this->client->request('POST', 'http://localhost/test.php', [
+			'http_errors' => false,
+			'auth' => [$this->config['username'], $this->config['password']],
+			'form_params' => [
+				'NETCONNECT_TRANSACTION' => urlencode(preg_replace('~>\s*\n\s*<~', '><', $xml))
+			]
+		]);
+
+		switch($response->getStatusCode()){
+			case 200:
+				$response=new Response($response);
+			break;
+			case 302:
+				throw new InvalidAuth;
+			break;
+			case 403:
+				throw new Unauthorized;
+			break;
+			case 404:
+				throw new InvalidApp;
+			break;
+			default:
+				throw new Exception($response->getReasonPhrase(),$response->getStatusCode());
+		}
+
+		return $response;
 	}
 
 	public function getPreQualificationReport(){
