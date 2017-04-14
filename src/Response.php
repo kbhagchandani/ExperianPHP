@@ -14,8 +14,8 @@ class Response{
 		$this->responseData=XML::decode($responseBody);
 	}
 
-	public function getProoducts(){
-		return $responseData;
+	public function getProducts(){
+		return $this->responseData['Products'];
 	}
 
 }

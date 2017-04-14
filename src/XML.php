@@ -7,7 +7,7 @@ class XML {
 		if (is_null($DOMDocument)) {
 			$DOMDocument =new \DOMDocument;
 			$DOMDocument->formatOutput = true;
-			$this->xmlEncode($mixed, $DOMDocument, $DOMDocument);
+			self::encode($mixed, $DOMDocument, $DOMDocument);
 			return $DOMDocument->saveXML();
 		}
 		else {
@@ -39,7 +39,7 @@ class XML {
 						}
 					}
 
-					$this->xmlEncode($mixedElement, $node, $DOMDocument);
+					self::encode($mixedElement, $node, $DOMDocument);
 				}
 			}
 			else {
@@ -50,7 +50,7 @@ class XML {
 	}
 
 	public static function decode($xmlStr){
-		$doc = new DOMDocument();
+		$doc = new \DOMDocument();
 		$doc->loadXML($xmlStr);
 		$nodes = $doc->documentElement;
 		return self::dom2array($nodes);
@@ -58,8 +58,18 @@ class XML {
 
 	private static function dom2array($dom,$data=[]){
 		foreach ($dom->childNodes AS $node) {
-			if($node->hasChildNodes()) {
+			if($node->childNodes->length && XML_TEXT_NODE !== $node->firstChild->nodeType && $node->hasChildNodes()) {
 				$data[$node->nodeName]=self::dom2array($node);
+			} else if(isset($data[$node->nodeName])) {
+				if(!is_array($data[$node->nodeName])){
+					$previousNodeValue=$data[$node->nodeName];
+					$data[$node->nodeName]=[
+						$previousNodeValue,
+						$node->nodeValue
+					];
+				} else {
+					$data[$node->nodeName][]=$node->nodeValue;
+				}
 			} else {
 				$data[$node->nodeName]=$node->nodeValue;
 			}

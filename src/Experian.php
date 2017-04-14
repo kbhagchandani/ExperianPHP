@@ -79,7 +79,7 @@ class Experian {
 	public function getPreQualificationReport(){
 		$requestData=PreQualificationReport::prepareRequestData($this->getARFRequest());
 		$response=$this->getResponse($requestData);
-		return $response;
+		return PreQualificationReport::extractReport($response);
 	}
 
 	public function getARFRequest(){
