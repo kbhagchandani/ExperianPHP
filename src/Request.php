@@ -22,10 +22,11 @@ class Request{
 	public function __construct($config){
 		$this->config=$config;
 		$this->client = new Client();
+		$this->getECALUrl();
 	}
 
 	private function getECALUrl(){
-		$response = $this->client->request('GET','http://www.experian.com/lookupServlet1',[
+		$response = $this->client->request('GET',"http://www.experian.com/lookupServlet1",[
 					'query'=>[
 						'lookupServiceName'=>'AccessPoint',
 						'lookupServiceVersion'=>'1.0',
