@@ -3,7 +3,7 @@
 	"description": "PHP library for Experian API",
 	"autoload": {
 		"psr-4": {
-			"Experian\\": ["src"]
+			"Experian\\": "src/",
 		}
 	},
 	"scripts": {

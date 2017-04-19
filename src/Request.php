@@ -22,7 +22,8 @@ class Request{
 	public function __construct($config){
 		$this->config=$config;
 		$this->client = new Client();
-		$this->getECALUrl();
+		// $this->getECALUrl();
+		$this->ecalURL="https://www.experian.com/netconnect2_0/servlets/NetConnectServlet";
 	}
 
 	private function getECALUrl(){
