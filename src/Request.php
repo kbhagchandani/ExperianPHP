@@ -22,8 +22,7 @@ class Request{
 	public function __construct($config){
 		$this->config=$config;
 		$this->client = new Client();
-		// $this->getECALUrl();
-		$this->ecalURL="https://www.experian.com/netconnect2_0/servlets/NetConnectServlet";
+		$this->getECALUrl();
 	}
 
 	private function getECALUrl(){
@@ -36,7 +35,7 @@ class Request{
 						'responseType'=>'text/plain'
 					]
 				]);
-		$this->ecalURL=$response->getBody()->getContents();
+		$this->ecalURL=trim($response->getBody()->getContents());
 	}
 
 	public function getARFResponse($products){
