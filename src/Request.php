@@ -2,6 +2,8 @@
 namespace Experian;
 
 use GuzzleHttp\Client;
+use Doctrine\Common\Inflector\Inflector;
+
 use Experian\Response;
 use Experian\XML;
 
@@ -22,7 +24,7 @@ class Request{
 	public function __construct($config){
 		$this->config=$config;
 		$this->client = new Client();
-		$this->getECALUrl();
+		// $this->getECALUrl();
 	}
 
 	private function getECALUrl(){
@@ -55,13 +57,13 @@ class Request{
 				]
 			]
 		];
-		$xml=XML::encode($request);
+		$xml=XML::encode($request,null,null,true);
 		$response = $this->client->request('POST', $this->ecalURL, [
 			'http_errors' => false,
 			'verify' => self::CERT_PATH.'/cacert.pem',
 			'auth' => [$this->config['username'], $this->config['password']],
 			'form_params' => [
-				'NETCONNECT_TRANSACTION' => urlencode(preg_replace('~>\s*\n\s*<~', '><', $xml))
+				'NETCONNECT_TRANSACTION' => rawurlencode($xml)
 			]
 		]);
 		switch($response->getStatusCode()){
@@ -82,6 +84,28 @@ class Request{
 		}
 
 		return $response;
+	}
+
+	public function getARFRequestParameters($configProperties=[]){
+		$requestData=[];
+		foreach($configProperties as $property){
+			$key=Inflector::classify($property);
+			if(is_array($this->config[$property])){
+				$requestData[$key]=[];
+				foreach($this->config[$property] as $subKey => $value){
+					$requestData[$key][Inflector::classify($subKey)]=$value;
+				}
+			} else {
+				$requestData[$key]=$this->config[$property];
+			}
+		}
+		// if(is_array($this->addOns)){
+		// 	$requestData['AddOns']=[];
+		// 	foreach($this->addOns as $addOn => $value){
+		// 		$requestData['AddOns'][$addOn]=$value;
+		// 	}
+		// }
+		return $requestData;
 	}
 
 	/**

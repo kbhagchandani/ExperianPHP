@@ -171,25 +171,39 @@ class PreQualificationReport {
 		Validation::validate($validationSchema,$applicationData);
 	}
 
-	public static function prepareRequestData($applicationData){
+	public static function prepareRequestData($baseObj){
+		$applicationData=$baseObj->getUserData();
 		self::isValid($applicationData);
-		$applicationData['AccountType']=[
-			'Type'=>'3F'
-		];
 
-		$applicationData['Options']=[
-			'ReferenceNumber'=>'00234',
-			'EndUser'=>'All Star Mortgage'
-		];
-
-		$applicationData['OutputType']=[
-			'XML'=>[
-				'ARFVersion'=>'07',
-				'Segment130'=>'Y'
+		$metaData=$baseObj->request->getARFRequestParameters(['vendor','subscriber']);
+		
+		$preparedData=[
+			'CreditProfile'=>[
+				'Subscriber'=>$metaData['Subscriber'],
+				'AccountType'=>[
+					'Type'=>'3F'
+				]
 			]
 		];
+
+		$preparedData['CreditProfile']=$preparedData['CreditProfile']+$applicationData;
+
+		$preparedData['CreditProfile']=$preparedData['CreditProfile']+
+					[
+						'Options'=>[
+								'ReferenceNumber'=>'00234',
+								'EndUser'=>'All Star Mortgage'
+							],
+						'Vendor'=>$metaData['Vendor'],
+						'OutputType'=>[
+							'XML'=>[
+								'ARFVersion'=>'07',
+								'Segment130'=>'Y'
+							]
+						]
+					];
 		
-		return ['CreditProfile'=>$applicationData];
+		return $preparedData;
 	}
 
 	public static function extractReport(Response $response){

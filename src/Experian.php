@@ -8,7 +8,7 @@ use Experian\PreQualificationReport;
 class Experian {
 
 	private $config;
-	private $request;
+	public $request;
 
 	private $data=[];
 
@@ -24,21 +24,13 @@ class Experian {
 	}
 
 	public function getPreQualificationReport(){
-		$products=PreQualificationReport::prepareRequestData($this->getARFRequest());
+		$products=PreQualificationReport::prepareRequestData($this);
 		$response=$this->request->getARFResponse($products);
 		return PreQualificationReport::extractReport($response);
 	}
 
-	public function getARFRequest(){
-		$requestData=$this->data;
-		$requestData['Vendor']=$this->config['vendor'];
-		$requestData['Subscriber']=$this->config['subscriber'];
-		if(is_array($this->addOns)){
-			$requestData['AddOns']=[];
-			foreach($this->addOns as $addOn => $value){
-				$requestData['AddOns'][$addOn]=$value;
-			}
-		}
-		return $requestData;
+	public function getUserData(){
+		return $this->data;
 	}
+	
 }

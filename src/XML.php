@@ -3,11 +3,12 @@
 namespace Experian;
 
 class XML {
-	public static function encode($mixed, $domElement=null, $DOMDocument=null) {
+	public static function encode($mixed, $domElement=null, $DOMDocument=null,$formatedOutput=false) {
 		if (is_null($DOMDocument)) {
 			$DOMDocument =new \DOMDocument;
 			$DOMDocument->formatOutput = true;
-			self::encode($mixed, $DOMDocument, $DOMDocument);
+			self::encode($mixed, $DOMDocument, $DOMDocument,$formatedOutput);
+			$DOMDocument->formatOutput = $formatedOutput;
 			return $DOMDocument->saveXML();
 		}
 		else {
@@ -39,7 +40,7 @@ class XML {
 						}
 					}
 
-					self::encode($mixedElement, $node, $DOMDocument);
+					self::encode($mixedElement, $node, $DOMDocument,$formatedOutput);
 				}
 			}
 			else {
