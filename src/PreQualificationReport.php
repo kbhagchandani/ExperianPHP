@@ -202,7 +202,6 @@ class PreQualificationReport {
 							]
 						]
 					];
-		
 		return $preparedData;
 	}
 

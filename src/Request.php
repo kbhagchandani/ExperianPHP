@@ -19,8 +19,6 @@ class Request{
 	private $responseData;
 	private $ecalURL;
 
-	const CERT_PATH = __DIR__.'/../cert';
-
 	public function __construct($config){
 		$this->config=$config;
 		$this->client = new Client();
@@ -57,10 +55,11 @@ class Request{
 				]
 			]
 		];
-		$xml=XML::encode($request,null,null,true);
+		$xml=XML::encode($request,null,null,false);
+		// die(rawurlencode($xml));
 		$response = $this->client->request('POST', $this->ecalURL, [
 			'http_errors' => false,
-			'verify' => self::CERT_PATH.'/cacert.pem',
+			'verify' => true,
 			'auth' => [$this->config['username'], $this->config['password']],
 			'form_params' => [
 				'NETCONNECT_TRANSACTION' => rawurlencode($xml)
@@ -106,22 +105,6 @@ class Request{
 		// 	}
 		// }
 		return $requestData;
-	}
-
-	/**
-	 * Install CA certificates extracted from Mozilla
-	 */
-	public static function installMozillaCACert(){
-		$client = new Client();
-		$response = $client->request('GET','https://curl.haxx.se/ca/cacert.pem',['verify' => true]);
-		if(!file_exists(self::CERT_PATH))
-			mkdir(self::CERT_PATH);
-		$f=fopen(self::CERT_PATH.'/cacert.pem','wb');
-		if(!$f) {
-			throw new \Exception('Failed to open file for saving.');
-		}
-		fwrite($f,$response->getBody()->getContents());
-		fclose($f);
 	}
 
 }
