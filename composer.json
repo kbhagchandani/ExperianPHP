@@ -4,6 +4,7 @@
 	"autoload": {
 		"psr-4": {
 			"Experian\\": "src/",
+			"Experian\\Exceptions": "src/Exceptions/",
 		}
 	},
 	"scripts": {

@@ -22,7 +22,7 @@ class Request{
 	public function __construct($config){
 		$this->config=$config;
 		$this->client = new Client();
-		// $this->getECALUrl();
+		$this->getECALUrl();
 	}
 
 	private function getECALUrl(){
@@ -56,13 +56,13 @@ class Request{
 			]
 		];
 		$xml=XML::encode($request,null,null,false);
-		// die(rawurlencode($xml));
 		$response = $this->client->request('POST', $this->ecalURL, [
 			'http_errors' => false,
 			'verify' => true,
+			// 'debug'=> true,
 			'auth' => [$this->config['username'], $this->config['password']],
 			'form_params' => [
-				'NETCONNECT_TRANSACTION' => rawurlencode($xml)
+				'NETCONNECT_TRANSACTION' => $xml
 			]
 		]);
 		switch($response->getStatusCode()){
@@ -79,7 +79,7 @@ class Request{
 				throw new InvalidApp;
 			break;
 			default:
-				throw new Exception($response->getReasonPhrase(),$response->getStatusCode());
+				throw new \Exception($response->getReasonPhrase(),$response->getStatusCode());
 		}
 
 		return $response;

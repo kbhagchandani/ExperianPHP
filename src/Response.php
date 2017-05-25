@@ -12,6 +12,9 @@ class Response{
 		$this->rawResponse=$psr7Response;
 		$responseBody=$this->rawResponse->getBody()->getContents();
 		$this->responseData=XML::decode($responseBody);
+		if(isset($this->responseData['ErrorMessage'])) {
+			throw new \Exception($this->responseData['ErrorMessage'],$this->responseData['CompletionCode']);
+		}
 	}
 
 	public function getProducts(){

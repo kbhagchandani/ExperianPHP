@@ -202,6 +202,12 @@ class PreQualificationReport {
 							]
 						]
 					];
+		if($baseObj->addOns->hasRequests()){
+			$preparedData['CreditProfile']=$preparedData['CreditProfile']+$baseObj->addOns->getAddOnData();
+			if($baseObj->addOns->hasOutputTags()){
+				$preparedData['CreditProfile']['OutputType']['XML']=$preparedData['CreditProfile']['OutputType']['XML']+$baseObj->addOns->getOutputTags();
+			}	
+		}
 		return $preparedData;
 	}
 
@@ -212,6 +218,7 @@ class PreQualificationReport {
 			if(isset($report['InformationalMessage']['MessageNumber']) && $report['InformationalMessage']['MessageNumber']=='07'){
 				throw new NoSuchRecordException;
 			}
+			return $report;
 		} else {
 			return $report;
 		}

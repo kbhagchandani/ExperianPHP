@@ -2,7 +2,7 @@
 namespace Experian;
 
 use Experian\Request;
-
+use Experian\AddOns;
 use Experian\PreQualificationReport;
 
 class Experian {
@@ -11,11 +11,11 @@ class Experian {
 	public $request;
 
 	private $data=[];
-
-	private $addOns=null;
+	public $addOns;
 
 	public function __construct($config){
 		$this->config=$config;
+		$this->addOns=new AddOns();
 		$this->request=new Request($config);
 	}
 
