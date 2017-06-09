@@ -41,6 +41,14 @@ class AddOns {
 		$this->setAddOnRequest('AutoProfileSummary',$mark);
 	}
 
+	public function enableExpandedHistory($mark=true){
+		$this->setAddOnRequest('ExpandedHistory',$mark);
+	}
+
+	public function enableDeferredPaymentInformation($mark=true){
+		$this->setAddOnRequest('DeferredPaymentInformation',$mark);
+	}
+
 	public function enableProfileSummary($mark=true){
 		$this->setAddOnRequest('ProfileSummary',$mark);
 	}
@@ -53,18 +61,16 @@ class AddOns {
 
 	/**
 	 *	@param riskModels
-	 *	@param noticeType 		 	Possible values are := Mortgage,General
-	 *	@param expandedHistory
+	 *	@param noticeType 		 	Possible values are := Mortgage,Generic
 	 */
-	public function enableCreditScoreExceptionNotice($riskModels,$noticeType,$expandedHistory=true){
+	public function enableCreditScoreExceptionNotice($riskModels,$noticeType){
 		$this->data['CreditScoreExceptionNotice'] =	[
 					'NoticeType' => $noticeType,
-					'RiskModels' => [],
-					'ExpandedHistory' => $expandedHistory?'Y':'N'
+					'RiskModel' => [],
 				];
 		foreach($riskModels as $riskModel){
 			$this->enableRiskModel($riskModel);
-			$this->data['CreditScoreExceptionNotice']['RiskModels'][]=$riskModel;
+			$this->data['CreditScoreExceptionNotice']['RiskModel'][]=$riskModel;
 		}
 	}
 

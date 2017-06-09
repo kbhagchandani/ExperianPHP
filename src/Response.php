@@ -18,7 +18,11 @@ class Response{
 	}
 
 	public function getProducts(){
-		return $this->responseData['Products'];
+		$Products=$this->responseData['Products'];
+		if(!$Products) {
+			throw new \Exception("Error getting reports.", 403);			
+		}
+		return $Products;
 	}
 
 }

@@ -26,6 +26,14 @@ class Request{
 	}
 
 	private function getECALUrl(){
+		$ecalCache=sys_get_temp_dir().'ecal.cache';
+		if(file_exists($ecalCache)){
+			$cacheData=json_decode(base64_decode(file_get_contents($ecalCache)));
+			if(is_object($cacheData) && (intVal(floor((time()-$cacheData['time'])/86400))<1)){
+				$this->ecalURL=$cacheData['url'];
+				return true;
+			}
+		}
 		$response = $this->client->request('GET',"http://www.experian.com/lookupServlet1",[
 					'query'=>[
 						'lookupServiceName'=>'AccessPoint',
@@ -36,6 +44,10 @@ class Request{
 					]
 				]);
 		$this->ecalURL=trim($response->getBody()->getContents());
+		file_put_contents($ecalCache,base64_encode(json_encode([
+						'url'=>$this->ecalURL,
+						'time'=>time()
+					])));
 	}
 
 	public function getARFResponse($products){
