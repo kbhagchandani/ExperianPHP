@@ -5,7 +5,7 @@ use Experian\Request;
 use Experian\AddOns;
 use Experian\PreQualificationReport;
 use Experian\Validation;
-use Experian\Exceptions\{MissingKeyFile,InvalidKeyFile,KeyFileWriteError};
+use Experian\Exceptions\{MissingKeyFile,InvalidKeyFile,KeyFileWriteError,PasswordUpdateException};
 
 class Experian {
 
@@ -14,12 +14,21 @@ class Experian {
 
 	private $data=[];
 	public $addOns;
+	private $loadedSystemConfig;
 
 	public function __construct($config){
 		self::validateConfig($config);
 		$this->readConfig($config);
+		$this->loadedSystemConfig=$config;
 		$this->addOns=new AddOns();
-		$this->request=new Request($config);
+		$this->request=new Request($this->config);
+		if(intVal(floor((time()-$config['lastTimePasswordUpdated'])/86400))>80){
+			if($config['autoPasswordReset'] ?? false){
+				$this->resetPassword();
+			} else {
+				throw new PasswordUpdateException();
+			}
+		}
 	}
 
 	public function set($key,$value){
@@ -140,5 +149,24 @@ class Experian {
 		$key = substr(sha1($config['key'], true), 0, 16);
 		$rawData=openssl_encrypt(json_encode($inputConfig), 'DES3', $key, null, $config['iv']);
 		file_put_contents($config['keyFile'], $rawData);
+	}
+
+	private function resetPassword(){
+		$newPassword=$this->request->resetPassord();
+		$this->updatePassword($newPassword);
+		$this->loadedSystemConfig['lastTimePasswordUpdated']=time();
+		call_user_func($this->loadedSystemConfig['updateExperianConfig']);
+	}
+
+	public function updatePassword($newPassword){
+		$this->config['password']=$newPassword;
+		$config=$this->loadedSystemConfig;
+		$key = substr(sha1($config['key'], true), 0, 16);
+		$rawData=openssl_encrypt(json_encode($this->config), 'DES3', $key, null, $config['iv']);
+		file_put_contents($config['keyFile'], $rawData);
+	}
+
+	public static function getManualPasswordLink(){
+		return "https://ss6.experian.com/securecontrol/logon.html";
 	}
 }

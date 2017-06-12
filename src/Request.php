@@ -7,10 +7,6 @@ use Doctrine\Common\Inflector\Inflector;
 use Experian\Response;
 use Experian\XML;
 
-use Experian\Exceptions\InvalidAuth;
-use Experian\Exceptions\Unauthorized;
-use Experian\Exceptions\InvalidApp;
-
 class Request{
 
 	private $client;
@@ -26,14 +22,19 @@ class Request{
 	}
 
 	private function getECALUrl(){
-		$ecalCache=sys_get_temp_dir().'ecal.cache';
+		$ecalCache=sys_get_temp_dir().'/ecal.cache';
+		$key = substr(sha1($this->config['username'], true), 0, 16);
 		if(file_exists($ecalCache)){
-			$cacheData=json_decode(base64_decode(file_get_contents($ecalCache)));
-			if(is_object($cacheData) && (intVal(floor((time()-$cacheData['time'])/86400))<1)){
+			$fp=fopen($ecalCache,"rb");
+			$cacheData=openssl_decrypt(fgets($fp),'blowfish',$key,OPENSSL_RAW_DATA);
+			fclose($fp);
+			$cacheData=json_decode($cacheData,TRUE);
+			if(is_array($cacheData) && (intVal(floor((time()-$cacheData['time'])/86400))<1)){
 				$this->ecalURL=$cacheData['url'];
 				return true;
 			}
 		}
+		
 		$response = $this->client->request('GET',"http://www.experian.com/lookupServlet1",[
 					'query'=>[
 						'lookupServiceName'=>'AccessPoint',
@@ -44,10 +45,13 @@ class Request{
 					]
 				]);
 		$this->ecalURL=trim($response->getBody()->getContents());
-		file_put_contents($ecalCache,base64_encode(json_encode([
+		Validation::isValidExperianURL($this->ecalURL);
+		$fp=fopen($ecalCache,"wb");
+		fputs($fp,openssl_encrypt(json_encode([
 						'url'=>$this->ecalURL,
 						'time'=>time()
-					])));
+					]),'blowfish',$key,OPENSSL_RAW_DATA));
+		fclose($fp);
 	}
 
 	public function getARFResponse($products){
@@ -77,23 +81,7 @@ class Request{
 				'NETCONNECT_TRANSACTION' => $xml
 			]
 		]);
-		switch($response->getStatusCode()){
-			case 200:
-				$response=new Response($response);
-			break;
-			case 302:
-				throw new InvalidAuth;
-			break;
-			case 403:
-				throw new Unauthorized;
-			break;
-			case 404:
-				throw new InvalidApp;
-			break;
-			default:
-				throw new \Exception($response->getReasonPhrase(),$response->getStatusCode());
-		}
-
+		$response=new Response($response,true);
 		return $response;
 	}
 
@@ -119,4 +107,35 @@ class Request{
 		return $requestData;
 	}
 
+	public function resetPassord(){
+		$response = $this->client->request('POST',"https://ss3.experian.com/securecontrol/reset/passwordreset",[
+			'http_errors' => false,
+			'verify' => true,
+			// 'debug'=> true,
+			'auth' => [$this->config['username'], $this->config['password']],
+			'form_params' => [
+				"command"=>"requestnewpassword",
+				"application"=>"netconnect"
+			]
+		]);
+		$response=new Response($response);
+		$newPassword=trim($response);
+		
+		$response = $this->client->request('POST',"https://ss3.experian.com/securecontrol/reset/passwordreset",[
+			'http_errors' => false,
+			'verify' => true,
+			// 'debug'=> true,
+			'auth' => [$this->config['username'], $this->config['password']],
+			'form_params' => [
+				"newpassword"=>$newPassword,
+				"command"=>"resetpassword",
+				"application"=>"netconnect"
+			]
+		]);
+		$response=new Response($response);
+		if($response!="SUCCESS")
+			throw new \Exception($response);
+
+		return $newPassword;
+	}
 }

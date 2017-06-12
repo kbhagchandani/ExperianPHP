@@ -6,6 +6,7 @@ use Experian\Exceptions\InvalidDataType;
 use Experian\Exceptions\CombinedLengthExceedsPermittedLimit;
 use Experian\Exceptions\FieldLengthExceedsPermittedLimit;
 use Experian\Exceptions\MissingMandatoryField;
+use Experian\Exceptions\InvalidHostUrl;
 
 class Validation {
 
@@ -35,4 +36,23 @@ class Validation {
 		return $combinedTextLength;
 	}
 
+	public static function isValidExperianURL($url){
+		$urlComponents=parse_url($url);
+		$host=explode('.',$urlComponents["host"]);
+		if(count($host)!=3 || "$host[1].$host[2]"!=="experian.com" || $urlComponents["scheme"]!=="https")
+			throw new InvalidHostUrl();
+		if(!isset($urlComponents["port"]))
+			$urlComponents["port"]=443;
+		$g = stream_context_create (array("ssl" => array("capture_peer_cert" => true)));
+		$r = stream_socket_client("ssl://{$urlComponents["host"]}:{$urlComponents["port"]}", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $g);
+		$cont = stream_context_get_params($r);
+		$certInfo=openssl_x509_parse($cont["options"]["ssl"]["peer_certificate"]);
+
+		if($certInfo['subject']['CN']!==$urlComponents["host"])
+			throw new InvalidSSL();
+		if($certInfo['validTo_time_t']<time())
+			throw new InvalidSSL();
+
+		return true;
+	}
 }
