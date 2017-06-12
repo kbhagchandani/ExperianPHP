@@ -36,7 +36,7 @@ class Response{
 				throw new InvalidApp;
 			break;
 			default:
-				throw new \Exception($response->getReasonPhrase(),$response->getStatusCode());
+				throw new \Exception($this->rawResponse->getReasonPhrase(),$this->rawResponse->getStatusCode());
 		}
 	}
 
