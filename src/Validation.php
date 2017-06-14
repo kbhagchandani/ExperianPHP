@@ -6,7 +6,7 @@ use Experian\Exceptions\InvalidDataType;
 use Experian\Exceptions\CombinedLengthExceedsPermittedLimit;
 use Experian\Exceptions\FieldLengthExceedsPermittedLimit;
 use Experian\Exceptions\MissingMandatoryField;
-use Experian\Exceptions\InvalidHostUrl;
+use Experian\Exceptions\{InvalidHostUrl,InvalidSSL};
 
 class Validation {
 
@@ -36,22 +36,34 @@ class Validation {
 		return $combinedTextLength;
 	}
 
-	public static function isValidExperianURL($url){
+	public static function isValidExperianURL($url,$log=null){
 		$urlComponents=parse_url($url);
 		$host=explode('.',$urlComponents["host"]);
-		if(count($host)!=3 || "$host[1].$host[2]"!=="experian.com" || $urlComponents["scheme"]!=="https")
+		$masterHost=$host[count($host)-2].'.'.end($host);
+
+		if(count($host)<3 || "$masterHost"!=="experian.com" || $urlComponents["scheme"]!=="https"){
+			if($log)
+				$log->error("InvalidHostUrl Exception: $url is an invalid ECAL transaction URL.");
 			throw new InvalidHostUrl();
+		}
 		if(!isset($urlComponents["port"]))
 			$urlComponents["port"]=443;
-		$g = stream_context_create (array("ssl" => array("capture_peer_cert" => true)));
+
+		$g = stream_context_create (array("ssl" => ["capture_peer_cert" => true,"verify_peer"=>false,'verify_peer_name'=>false]));
 		$r = stream_socket_client("ssl://{$urlComponents["host"]}:{$urlComponents["port"]}", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $g);
 		$cont = stream_context_get_params($r);
 		$certInfo=openssl_x509_parse($cont["options"]["ssl"]["peer_certificate"]);
 
-		if($certInfo['subject']['CN']!==$urlComponents["host"])
+		if($certInfo['subject']['CN']!==$urlComponents["host"]){
+			if($log)
+				$log->error("InvalidSSL Exception: $url has invalid hostname {$certInfo['subject']['CN']} in certificate.");
 			throw new InvalidSSL();
-		if($certInfo['validTo_time_t']<time())
+		}
+		if($certInfo['validTo_time_t']<time()) {
+			if($log)
+				$log->error("InvalidSSL Exception: $url has expired certificate.");
 			throw new InvalidSSL();
+		}
 
 		return true;
 	}

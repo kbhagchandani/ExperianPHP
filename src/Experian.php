@@ -21,7 +21,7 @@ class Experian {
 		$this->readConfig($config);
 		$this->loadedSystemConfig=$config;
 		$this->addOns=new AddOns();
-		$this->request=new Request($this->config);
+		$this->request=new Request($this->config,$this->loadedSystemConfig);
 		if(intVal(floor((time()-$config['lastTimePasswordUpdated'])/86400))>80){
 			if($config['autoPasswordReset'] ?? false){
 				$this->resetPassword();
@@ -51,7 +51,7 @@ class Experian {
 			
 		$rawCredentials=file_get_contents($config['keyFile']);
 		$key = substr(sha1($config['key'], true), 0, 16);
-		$rawCredentials=openssl_decrypt($rawCredentials,'DES3', $key, null, $config['iv']);
+		$rawCredentials=openssl_decrypt($rawCredentials,'DES3', $key, null, substr($config['iv'],0,8));
 		$this->config=json_decode($rawCredentials,true);
 		if(!$this->config)
 			throw new InvalidKeyFile();
@@ -147,7 +147,7 @@ class Experian {
 		];
 		Validation::validate($configSchema,$inputConfig);
 		$key = substr(sha1($config['key'], true), 0, 16);
-		$rawData=openssl_encrypt(json_encode($inputConfig), 'DES3', $key, null, $config['iv']);
+		$rawData=openssl_encrypt(json_encode($inputConfig), 'DES3', $key, null, substr($config['iv'],0,8));
 		file_put_contents($config['keyFile'], $rawData);
 	}
 
@@ -162,7 +162,7 @@ class Experian {
 		$this->config['password']=$newPassword;
 		$config=$this->loadedSystemConfig;
 		$key = substr(sha1($config['key'], true), 0, 16);
-		$rawData=openssl_encrypt(json_encode($this->config), 'DES3', $key, null, $config['iv']);
+		$rawData=openssl_encrypt(json_encode($this->config), 'DES3', $key, null, substr($config['iv'],0,8));
 		file_put_contents($config['keyFile'], $rawData);
 	}
 

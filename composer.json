@@ -1,22 +1,19 @@
 {
 	"name": "kbhagchandani/experian-php",
 	"description": "PHP library for Experian API",
+	"homepage": "https://github.com/kbhagchandani/ExperianPHP",
+    "type": "library",
 	"autoload": {
 		"psr-4": {
 			"Experian\\": "src/",
 			"Experian\\Exceptions": "src/Exceptions/",
 		}
 	},
-	"scripts": {
-		"post-update-cmd": "Experian\\Request::installMozillaCACert",
-		"post-package-install": [
-			"Experian\\Request::installMozillaCACert"
-		]
-	},
 	"require": {
-		"php": ">=5.5",
+		"php": ">=7.1",
 		"guzzlehttp/guzzle": "~6.0",
-		"doctrine/inflector":"~1.1.0"
+		"doctrine/inflector":"~1.1.0",
+		"monolog/monolog": "^1.22"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "4.0.*"

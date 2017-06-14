@@ -7,6 +7,9 @@ use Doctrine\Common\Inflector\Inflector;
 use Experian\Response;
 use Experian\XML;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
 class Request{
 
 	private $client;
@@ -14,19 +17,23 @@ class Request{
 	private $rawResponse;
 	private $responseData;
 	private $ecalURL;
+	private $log;
 
-	public function __construct($config){
+	public function __construct(&$config,&$loadedSystemConfig){
 		$this->config=$config;
+		$this->loadedSystemConfig=$loadedSystemConfig;
 		$this->client = new Client();
+		$this->log = new Logger('ExperianRequests');
+		$this->log->pushHandler(new StreamHandler($loadedSystemConfig["logFile"], Logger::DEBUG));
 		$this->getECALUrl();
 	}
 
-	private function getECALUrl(){
+	private function getECALUrl($serviceVersion='2.0'){
 		$ecalCache=sys_get_temp_dir().'/ecal.cache';
 		$key = substr(sha1($this->config['username'], true), 0, 16);
-		if(file_exists($ecalCache)){
+		if(file_exists($ecalCache) && $serviceVersion=='2.0'){
 			$fp=fopen($ecalCache,"rb");
-			$cacheData=openssl_decrypt(fgets($fp),'blowfish',$key,OPENSSL_RAW_DATA);
+			$cacheData=openssl_decrypt(fgets($fp),'blowfish',$key,null,substr($this->loadedSystemConfig['iv'],0,8));
 			fclose($fp);
 			$cacheData=json_decode($cacheData,TRUE);
 			if(is_array($cacheData) && (intVal(floor((time()-$cacheData['time'])/86400))<1)){
@@ -34,24 +41,48 @@ class Request{
 				return true;
 			}
 		}
-		
+
 		$response = $this->client->request('GET',"http://www.experian.com/lookupServlet1",[
 					'query'=>[
 						'lookupServiceName'=>'AccessPoint',
 						'lookupServiceVersion'=>'1.0',
 						'serviceName'=>$this->config['service_name'],
-						'serviceVersion'=>'2.0',
+						'serviceVersion'=>$serviceVersion,
 						'responseType'=>'text/plain'
 					]
 				]);
 		$this->ecalURL=trim($response->getBody()->getContents());
-		Validation::isValidExperianURL($this->ecalURL);
+		Validation::isValidExperianURL($this->ecalURL,($this->loadedSystemConfig['logEcal']?$this->log:null));
 		$fp=fopen($ecalCache,"wb");
 		fputs($fp,openssl_encrypt(json_encode([
 						'url'=>$this->ecalURL,
 						'time'=>time()
-					]),'blowfish',$key,OPENSSL_RAW_DATA));
+					]),'blowfish',$key,null,substr($this->loadedSystemConfig['iv'],0,8)));
 		fclose($fp);
+	}
+
+	public function testMasterHostECAL(){
+		$this->config['service_name']="NetConnect";
+		$this->getECALUrl('0.1');
+	}
+
+	public function testCertificateHostECAL(){
+		$this->config['service_name']="NetConnect";
+		$this->getECALUrl('0.2');
+	}
+
+	public function testCertificateTrustECAL(){
+		$this->config['service_name']="NetConnect";
+		$this->getECALUrl('0.3');
+	}
+
+	public function testCertificateValidityECAL(){
+		$ip=gethostbyname("ectst001a.ec.experian.com");
+		if($ip=="205.174.34.81"){
+			throw new \Exception("Not Ready for test. Please update your hosts file. Before this test.");
+		}
+		$this->config['service_name']="NetConnect";
+		$this->getECALUrl('0.4');
 	}
 
 	public function getARFResponse($products){
@@ -119,7 +150,7 @@ class Request{
 			]
 		]);
 		$response=new Response($response);
-		$newPassword=trim($response);
+		$newPassword=$response->getHeader('Response');
 		
 		$response = $this->client->request('POST',"https://ss3.experian.com/securecontrol/reset/passwordreset",[
 			'http_errors' => false,

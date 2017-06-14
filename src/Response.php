@@ -52,4 +52,12 @@ class Response{
 		return $responseBody;
 	}
 
+	public function getHeader($headerName){
+		return $this->rawResponse->getHeader($headerName);
+	}
+
+	public function getHeaders(){
+		return $this->rawResponse->getHeaders();
+	}
+
 }
