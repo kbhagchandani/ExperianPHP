@@ -50,6 +50,7 @@ class Experian {
 	}
 
 	public function getPreQualificationReport(){
+		$this->isAccessAllowed();
 		try {
 			$products=PreQualificationReport::prepareRequestData($this);
 			$response=$this->request->getARFResponse($products);

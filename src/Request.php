@@ -108,7 +108,7 @@ class Request{
 				'NETCONNECT_TRANSACTION' => $xml
 			]
 		]);
-		$response=new Response($response,true);
+		$response=new Response($response,$this->log,true);
 		return $response;
 	}
 
