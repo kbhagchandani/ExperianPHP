@@ -2,11 +2,11 @@
 
 namespace Experian;
 
-use Experian\Exceptions\InvalidDataType;
-use Experian\Exceptions\CombinedLengthExceedsPermittedLimit;
-use Experian\Exceptions\FieldLengthExceedsPermittedLimit;
-use Experian\Exceptions\MissingMandatoryField;
-use Experian\Exceptions\{InvalidHostUrl,InvalidSSL};
+use Experian\Exceptions\InvalidDataTypeException;
+use Experian\Exceptions\CombinedLengthExceedsPermittedLimitException;
+use Experian\Exceptions\FieldLengthExceedsPermittedLimitException;
+use Experian\Exceptions\MissingMandatoryFieldException;
+use Experian\Exceptions\{InvalidHostUrlException,InvalidSSLException};
 
 class Validation {
 
@@ -16,21 +16,21 @@ class Validation {
 			if(isset($data[$node]) && !empty($data[$node])) {
 				if(isset($validationProperty['ChildNodes'])) {
 					if(!is_array($data[$node])) {
-						throw new InvalidDataType($node,'Associative Array');
+						throw new InvalidDataTypeException($node,'Associative Array');
 					}
 					$childNodesCombinedTextLength=self::validate($validationProperty['ChildNodes'],$data[$node]);
 					if(isset($validationProperty['CombinedChildTextLengthLimit']) && $validationProperty['CombinedChildTextLengthLimit']<$childNodesCombinedTextLength) {
-						throw new CombinedLengthExceedsPermittedLimit($node,$validationProperty['CombinedChildTextLengthLimit']);
+						throw new CombinedLengthExceedsPermittedLimitException($node,$validationProperty['CombinedChildTextLengthLimit']);
 					}
 				} else {
 					$length=strlen($data[$node]);
 					if(isset($validationProperty['MaxLength']) && $validationProperty['MaxLength']<$length){
-						throw new FieldLengthExceedsPermittedLimit($node,$validationProperty['MaxLength']);	
+						throw new FieldLengthExceedsPermittedLimitException($node,$validationProperty['MaxLength']);	
 					}
 					$combinedTextLength+=$length;
 				}
 			} else if(isset($validationProperty['Required']) && $validationProperty['Required']) {
-				throw new MissingMandatoryField($node);
+				throw new MissingMandatoryFieldException($node);
 			}
 		}
 		return $combinedTextLength;
@@ -44,7 +44,7 @@ class Validation {
 		if(count($host)<3 || "$masterHost"!=="experian.com" || $urlComponents["scheme"]!=="https"){
 			if($log)
 				$log->error("InvalidHostUrl Exception: $url is an invalid ECAL transaction URL.");
-			throw new InvalidHostUrl();
+			throw new InvalidHostUrlException();
 		}
 		if(!isset($urlComponents["port"]))
 			$urlComponents["port"]=443;
@@ -57,12 +57,12 @@ class Validation {
 		if($certInfo['subject']['CN']!==$urlComponents["host"]){
 			if($log)
 				$log->error("InvalidSSL Exception: $url has invalid hostname {$certInfo['subject']['CN']} in certificate.");
-			throw new InvalidSSL();
+			throw new InvalidSSLException();
 		}
 		if($certInfo['validTo_time_t']<time()) {
 			if($log)
 				$log->error("InvalidSSL Exception: $url has expired certificate.");
-			throw new InvalidSSL();
+			throw new InvalidSSLException();
 		}
 
 		return true;

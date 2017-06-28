@@ -1,10 +1,10 @@
 <?php
 namespace Experian\Exceptions;
 
-class InvalidKeyFile extends \Exception{
+class InvalidHostUrlException extends \Exception{
 	public function __construct (
-		$message = "Invalid Key File. It may be corrupted." , 
-		$code = 500 ,
+		string $message = "Invalid Net Connect transaction URL." , 
+		int $code = 502 ,
 		\Throwable $previous = NULL
 	){
 		parent::__construct($message,$code,$previous);

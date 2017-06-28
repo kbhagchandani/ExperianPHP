@@ -5,7 +5,11 @@ use Experian\Request;
 use Experian\AddOns;
 use Experian\PreQualificationReport;
 use Experian\Validation;
-use Experian\Exceptions\{MissingKeyFile,InvalidKeyFile,KeyFileWriteError,PasswordUpdateException};
+use Experian\Exceptions\{MissingKeyFileException, InvalidKeyFileException, KeyFileWriteException, PasswordUpdateException};
+use Experian\Exceptions\{InvalidAuthException, UnauthorizedException, AccountBlockedException};
+
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 class Experian {
 
@@ -21,14 +25,24 @@ class Experian {
 		$this->readConfig($config);
 		$this->loadedSystemConfig=$config;
 		$this->addOns=new AddOns();
-		$this->request=new Request($this->config,$this->loadedSystemConfig);
-		if(intVal(floor((time()-$config['lastTimePasswordUpdated'])/86400))>80){
-			if($config['autoPasswordReset'] ?? false){
+		$this->log = new Logger('ExperianRequests');
+		$this->log->pushHandler(new StreamHandler($this->loadedSystemConfig["logFile"], Logger::DEBUG));
+		$this->request=new Request($this->config,$this->loadedSystemConfig,$this->log);
+	}
+
+	public function isAccessAllowed() {
+		if($this->config['failue_count'] ?? false){
+			if($this->config['failue_count']>=2)
+				throw new AccountBlockedException();
+		}
+		if(intVal(floor((time()-$this->loadedSystemConfig['lastTimePasswordUpdated'])/86400))>30){
+			if($this->loadedSystemConfig['autoPasswordReset'] ?? false){
 				$this->resetPassword();
 			} else {
 				throw new PasswordUpdateException();
 			}
 		}
+		return true;
 	}
 
 	public function set($key,$value){
@@ -36,9 +50,13 @@ class Experian {
 	}
 
 	public function getPreQualificationReport(){
-		$products=PreQualificationReport::prepareRequestData($this);
-		$response=$this->request->getARFResponse($products);
-		return PreQualificationReport::extractReport($response);
+		try {
+			$products=PreQualificationReport::prepareRequestData($this);
+			$response=$this->request->getARFResponse($products);
+			return PreQualificationReport::extractReport($response);
+		} catch (UnauthorizedException | InvalidAuthException $e) {
+			$this->handleAuthFailure($e);
+		}
 	}
 
 	public function getUserData(){
@@ -47,14 +65,14 @@ class Experian {
 
 	private function readConfig($config){
 		if(!file_exists($config['keyFile']))
-			throw new MissingKeyFile();
+			throw new MissingKeyFileException();
 			
 		$rawCredentials=file_get_contents($config['keyFile']);
 		$key = substr(sha1($config['key'], true), 0, 16);
 		$rawCredentials=openssl_decrypt($rawCredentials,'DES3', $key, null, substr($config['iv'],0,8));
 		$this->config=json_decode($rawCredentials,true);
 		if(!$this->config)
-			throw new InvalidKeyFile();
+			throw new InvalidKeyFileException();
 	}
 
 	private static function validateConfig($config){
@@ -82,7 +100,7 @@ class Experian {
 	public static function generateKeyFile($config,$inputConfig){
 		self::validateConfig($config);
 		if(!is_writable($config['keyFile']))
-			throw new KeyFileWriteError();
+			throw new KeyFileWriteException();
 		$configSchema=[
 			'username'=>[
 						'Required'=>true,
@@ -158,9 +176,39 @@ class Experian {
 		call_user_func($this->loadedSystemConfig['updateExperianConfig']);
 	}
 
+	private function handleAuthFailure(&$e){
+		$failureCount=$this->config['failue_count'] ?? 0;
+		$failureCount++;
+		$this->updateFailureCount($failureCount);
+		if($failureCount>=3){
+			$this->log->emergency("Permanent Auth Failure. Account may be locked.");
+			throw new AccountBlockedException();
+		} else {
+			$this->log->alert("Auth Failed for $failureCount time.");
+			throw $e;
+		}
+	}
+/**
+ *	This Function is designed to increase the failure count
+ *	and is useful for test purpose only
+ *	@param $count [int]
+ */
+	public function updateFailureCount($count){
+		$this->config['failue_count']=$count;
+		$this->saveConfig();
+	}
+
 	public function updatePassword($newPassword){
 		$this->config['password']=$newPassword;
+		unset($this->config['failue_count']);
+		$this->saveConfig();
+		call_user_func($this->loadedSystemConfig['updateExperianConfig']);
+	}
+
+	private function saveConfig(){
 		$config=$this->loadedSystemConfig;
+		if(!is_writable($config['keyFile']))
+			throw new KeyFileWriteException();
 		$key = substr(sha1($config['key'], true), 0, 16);
 		$rawData=openssl_encrypt(json_encode($this->config), 'DES3', $key, null, substr($config['iv'],0,8));
 		file_put_contents($config['keyFile'], $rawData);

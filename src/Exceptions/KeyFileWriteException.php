@@ -1,13 +1,12 @@
 <?php
 namespace Experian\Exceptions;
 
-class MissingMandatoryField extends \Exception{
+class KeyFileWriteException extends \Exception{
 	public function __construct (
-		$fieldName, 
-		$code = 412 ,
+		$message = "Experian key cannot be written to the specified path in the config file.", 
+		$code = 500 ,
 		\Throwable $previous = NULL
 	){
-		$message=sprintf('%s is required.',$fieldName);
 		parent::__construct($message,$code,$previous);
 	}
 }

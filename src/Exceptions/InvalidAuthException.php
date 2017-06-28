@@ -1,10 +1,10 @@
 <?php
 namespace Experian\Exceptions;
 
-class InvalidSSL extends \Exception{
+class InvalidAuthException extends \Exception{
 	public function __construct (
-		string $message = "Invalid SSL for URL." , 
-		int $code = 502 ,
+		$message = "Incorrect User ID and/or Password." , 
+		$code = 401 ,
 		\Throwable $previous = NULL
 	){
 		parent::__construct($message,$code,$previous);

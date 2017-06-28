@@ -1,7 +1,7 @@
 <?php
 namespace Experian\Exceptions;
 
-class InvalidAuth extends \Exception{
+class InvalidAppException extends \Exception{
 	public function __construct (
 		string $message = "Net Connect application is unavailable." , 
 		int $code = 400 ,

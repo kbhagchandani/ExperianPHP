@@ -1,7 +1,7 @@
 <?php
 namespace Experian\Exceptions;
 
-class InvalidDataType extends \Exception{
+class InvalidDataTypeException extends \Exception{
 	public function __construct (
 		string $fieldName,
 		string $expectedType

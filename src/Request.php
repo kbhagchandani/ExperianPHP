@@ -7,9 +7,6 @@ use Doctrine\Common\Inflector\Inflector;
 use Experian\Response;
 use Experian\XML;
 
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
 class Request{
 
 	private $client;
@@ -19,12 +16,11 @@ class Request{
 	private $ecalURL;
 	private $log;
 
-	public function __construct(&$config,&$loadedSystemConfig){
+	public function __construct(&$config,&$loadedSystemConfig,&$log){
 		$this->config=$config;
 		$this->loadedSystemConfig=$loadedSystemConfig;
 		$this->client = new Client();
-		$this->log = new Logger('ExperianRequests');
-		$this->log->pushHandler(new StreamHandler($loadedSystemConfig["logFile"], Logger::DEBUG));
+		$this->log = $log;
 		$this->getECALUrl();
 	}
 
@@ -78,7 +74,7 @@ class Request{
 
 	public function testCertificateValidityECAL(){
 		$ip=gethostbyname("ectst001a.ec.experian.com");
-		if($ip=="205.174.34.81"){
+		if($ip!=="205.174.34.81"){
 			throw new \Exception("Not Ready for test. Please update your hosts file. Before this test.");
 		}
 		$this->config['service_name']="NetConnect";
@@ -129,12 +125,6 @@ class Request{
 				$requestData[$key]=$this->config[$property];
 			}
 		}
-		// if(is_array($this->addOns)){
-		// 	$requestData['AddOns']=[];
-		// 	foreach($this->addOns as $addOn => $value){
-		// 		$requestData['AddOns'][$addOn]=$value;
-		// 	}
-		// }
 		return $requestData;
 	}
 
@@ -149,9 +139,9 @@ class Request{
 				"application"=>"netconnect"
 			]
 		]);
-		$response=new Response($response);
+		$response=new Response($response,$this->log);
 		$newPassword=$response->getHeader('Response');
-		
+		$this->log->info("New Password received: $newPassword");
 		$response = $this->client->request('POST',"https://ss3.experian.com/securecontrol/reset/passwordreset",[
 			'http_errors' => false,
 			'verify' => true,
@@ -163,8 +153,8 @@ class Request{
 				"application"=>"netconnect"
 			]
 		]);
-		$response=new Response($response);
-		if($response!="SUCCESS")
+		$response=new Response($response,$this->log);
+		if($response->getHeader('Response')!="SUCCESS")
 			throw new \Exception($response);
 
 		return $newPassword;

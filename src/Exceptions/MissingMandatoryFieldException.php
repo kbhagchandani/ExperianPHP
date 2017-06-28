@@ -1,12 +1,13 @@
 <?php
 namespace Experian\Exceptions;
 
-class InvalidAuth extends \Exception{
+class MissingMandatoryFieldException extends \Exception{
 	public function __construct (
-		$message = "Incorrect User ID and/or Password." , 
-		$code = 401 ,
+		$fieldName, 
+		$code = 412 ,
 		\Throwable $previous = NULL
 	){
+		$message=sprintf('%s is required.',$fieldName);
 		parent::__construct($message,$code,$previous);
 	}
 }

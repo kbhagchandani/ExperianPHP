@@ -3,17 +3,19 @@ namespace Experian;
 
 use Experian\XML;
 
-use Experian\Exceptions\InvalidAuth;
-use Experian\Exceptions\Unauthorized;
-use Experian\Exceptions\InvalidApp;
+use Experian\Exceptions\InvalidAuthException;
+use Experian\Exceptions\UnauthorizedException;
+use Experian\Exceptions\InvalidAppException;
 
 class Response{
 
 	private $rawResponse;
 	private $responseData;
+	private $log;
 
-	public function __construct($psr7Response,$parseXML=false){
+	public function __construct($psr7Response,&$log,$parseXML=false){
 		$this->rawResponse=$psr7Response;
+		$this->log=$log;
 		switch($this->rawResponse->getStatusCode()){
 			case 200:
 				$responseBody=$this->rawResponse->getBody()->getContents();
@@ -27,13 +29,13 @@ class Response{
 				}
 			break;
 			case 302:
-				throw new InvalidAuth;
+				throw new InvalidAuthException;
 			break;
 			case 403:
-				throw new Unauthorized;
+				throw new UnauthorizedException;
 			break;
 			case 404:
-				throw new InvalidApp;
+				throw new InvalidAppException;
 			break;
 			default:
 				throw new \Exception($this->rawResponse->getReasonPhrase(),$this->rawResponse->getStatusCode());
@@ -53,7 +55,11 @@ class Response{
 	}
 
 	public function getHeader($headerName){
-		return $this->rawResponse->getHeader($headerName);
+		$header=$this->rawResponse->getHeader($headerName);
+		if(is_array($header))
+			return $header[0];
+		else
+			throw new \Exception("Unknown Header : $headerName");
 	}
 
 	public function getHeaders(){

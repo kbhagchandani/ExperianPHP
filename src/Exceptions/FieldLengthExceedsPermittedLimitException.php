@@ -1,7 +1,7 @@
 <?php
 namespace Experian\Exceptions;
 
-class FieldLengthExceedsPermittedLimit extends \Exception{
+class FieldLengthExceedsPermittedLimitException extends \Exception{
 	public function __construct (
 		string $fieldName,
 		string $expectedLength
