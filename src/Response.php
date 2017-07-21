@@ -13,14 +13,14 @@ class Response{
 	private $responseData;
 	private $log;
 
-	public function __construct($psr7Response,&$log,$parseXML=false){
+	public function __construct($psr7Response,&$log,$parseXML=false,$logIO=false){
 		$this->rawResponse=$psr7Response;
 		$this->log=$log;
 		switch($this->rawResponse->getStatusCode()){
 			case 200:
 				$responseBody=$this->rawResponse->getBody()->getContents();
 				if($parseXML){
-					if($this->loadedSystemConfig['logIO'] ?? false){
+					if($logIO){
 						$this->log->info("Experian NetConnectTransaction Response : $responseBody");
 					}
 					$this->responseData=XML::decode($responseBody);
