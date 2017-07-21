@@ -20,6 +20,9 @@ class Response{
 			case 200:
 				$responseBody=$this->rawResponse->getBody()->getContents();
 				if($parseXML){
+					if($this->loadedSystemConfig['logIO'] ?? false){
+						$this->log->info("Experian NetConnectTransaction Response : $responseBody");
+					}
 					$this->responseData=XML::decode($responseBody);
 					if(isset($this->responseData['ErrorMessage'])) {
 						throw new \Exception($this->responseData['ErrorMessage'],$this->responseData['CompletionCode']);

@@ -26,6 +26,7 @@ class Experian {
 		$this->loadedSystemConfig=$config;
 		$this->addOns=new AddOns();
 		$this->log = new Logger('ExperianRequests');
+		$this->loadedSystemConfig["logFile"]=str_replace('[date]', date('Y-m-d'), $this->loadedSystemConfig["logFile"]);
 		$this->log->pushHandler(new StreamHandler($this->loadedSystemConfig["logFile"], Logger::DEBUG));
 		$this->request=new Request($this->config,$this->loadedSystemConfig,$this->log);
 	}

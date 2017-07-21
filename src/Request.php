@@ -108,6 +108,9 @@ class Request{
 				'NETCONNECT_TRANSACTION' => $xml
 			]
 		]);
+		if($this->loadedSystemConfig['logIO'] ?? false){
+			$this->log->info("Experian NetConnectTransaction Request : $xml");
+		}
 		$response=new Response($response,$this->log,true);
 		return $response;
 	}
