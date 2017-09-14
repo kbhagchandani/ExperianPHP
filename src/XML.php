@@ -60,9 +60,20 @@ class XML {
 	private static function dom2array($dom,$data=[]){
 		foreach ($dom->childNodes AS $node) {
 			if($node->childNodes->length && XML_TEXT_NODE !== $node->firstChild->nodeType && $node->hasChildNodes()) {
-				$data[$node->nodeName]=self::dom2array($node);
+				if(isset($data[$node->nodeName])){
+					if(!is_array($data[$node->nodeName]) || !isset($data[$node->nodeName][0])){
+						$previousNodeValue=$data[$node->nodeName];
+						$data[$node->nodeName]=[
+							$previousNodeValue,
+							self::dom2array($node)
+						];
+					} else {
+						$data[$node->nodeName][]=self::dom2array($node);
+					}
+				} else
+					$data[$node->nodeName]=self::dom2array($node);
 			} else if(isset($data[$node->nodeName])) {
-				if(!is_array($data[$node->nodeName])){
+				if(!is_array($data[$node->nodeName]) || !isset($data[$node->nodeName][0])){
 					$previousNodeValue=$data[$node->nodeName];
 					$data[$node->nodeName]=[
 						$previousNodeValue,
@@ -72,7 +83,16 @@ class XML {
 					$data[$node->nodeName][]=$node->nodeValue;
 				}
 			} else {
-				$data[$node->nodeName]=$node->nodeValue;
+				if(!empty($node->nodeValue)){
+					$data[$node->nodeName]=$node->nodeValue;
+				} else if($node->hasAttributes()){
+					$data[$node->nodeName]=[];
+					foreach($node->attributes as $attribute=>$attrNode){
+						$data[$node->nodeName][$attribute]=$attrNode->value;
+					}
+				} else {
+					$data[$node->nodeName]=null;
+				}
 			}
 		}
 		return $data;
