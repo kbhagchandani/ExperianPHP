@@ -223,4 +223,70 @@ class PreQualificationReport {
 			return $report;
 		}
 	}
+
+	public static function mapDescription($report){
+		if(isset($report['RiskModel'])) {
+			require_once(__DIR__."/CodeMaps/ModelCodeFactors/index.php");
+			if(isset($report['RiskModel'][0])){
+				$riskModels=count($report['RiskModel']);
+				for($i=0;$i<$riskModels;$i++){
+					self::mapValues($report['RiskModel'][$i],$modelMap,'RiskModel');
+				}
+			} else {
+				self::mapValues($report['RiskModel'],$modelMap,'RiskModel');
+			}
+		}
+		if(isset($report['TradeLine'])) {
+			require_once(__DIR__."/CodeMaps/AccountConditions.php");
+			require_once(__DIR__."/CodeMaps/PaymentStatus.php");
+			require_once(__DIR__."/CodeMaps/AccountPurpose.php");
+			$codeMaps=['accountConditions'=>$accountConditions,'paymentStatus'=>$paymentStatus,'accountPurpose'=>$accountPurpose];
+			if(isset($report['TradeLine'][0])){
+				$tradeLines=count($report['TradeLine']);
+				for($i=0;$i<$tradeLines;$i++){
+					self::mapValues($report['TradeLine'][$i],$codeMaps,'TradeLine');
+				}
+			} else {
+				self::mapValues($report['TradeLine'],$codeMaps,'TradeLine');
+			}
+		}
+		if(isset($report['Inquiry'])) {
+			require_once(__DIR__."/CodeMaps/KindOfBusiness.php");
+			require_once(__DIR__."/CodeMaps/AccountPurpose.php");
+			$codeMaps=['kindOfBusiness'=>$kindOfBusiness,'accountPurpose'=>$accountPurpose];
+			if(isset($report['Inquiry'][0])){
+				$inquiries=count($report['Inquiry']);
+				for($i=0;$i<$inquiries;$i++){
+					self::mapValues($report['Inquiry'][$i],$codeMaps,'Inquiry');
+				}
+			} else {
+				self::mapValues($report['Inquiry'],$codeMaps,'Inquiry');
+			}
+		}
+		return $report;
+	}
+
+	private static function mapValues(&$target,$source,$type){
+		switch($type){
+			case 'RiskModel':
+				$modelCode=$source[$target['ModelIndicator']['code']];
+				require(__DIR__."/CodeMaps/ModelCodeFactors/{$modelCode}.php");
+				$target['ScoreFactors']=[];
+				foreach(['ScoreFactorCodeOne','ScoreFactorCodeTwo','ScoreFactorCodeThree','ScoreFactorCodeFour'] as $codeFactor){
+					$code=sprintf('%02s',$target[$codeFactor]);
+					$target['ScoreFactors'][$code]=$codeMap[$code];
+					unset($target[$codeFactor]);
+				}
+			break;
+			case 'TradeLine':
+				$target['EnhancedPaymentData']['AccountCondition']['description']=$source['accountConditions'][sprintf('%02s',$target['EnhancedPaymentData']['AccountCondition']['code'])];
+				$target['EnhancedPaymentData']['PaymentStatus']['description']=$source['paymentStatus'][sprintf('%02s',$target['EnhancedPaymentData']['AccountCondition']['code'])][sprintf('%02s',$target['EnhancedPaymentData']['PaymentStatus']['code'])];
+				$target['EnhancedPaymentData']['AccountType']['description']=$source['accountPurpose'][sprintf('%02s',$target['EnhancedPaymentData']['AccountType']['code'])];
+			break;
+			case 'Inquiry':
+				$target['KOB']['description']=$source['kindOfBusiness'][sprintf('%02s',$target['KOB']['code'])];
+				$target['Type']['description']=$source['accountPurpose'][sprintf('%02s',$target['Type']['code'])];
+			break;
+		}
+	}
 }
