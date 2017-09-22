@@ -107,52 +107,194 @@ $paymentStatus=[
 			'97' => 'CHARGOFF'	
 		],
 	'A3'=>[
+			'07' => 'CUR WAS 60-2',
+			'8'	=> 'CUR WAS 60-3', 
+			'9'=> 'CUR WAS 60-4+',
+			'11' =>	 'CUR ACCT', 
+			'14' => 'CUR WAS 90-2',
+			'15'	=> 'CUR WAS 90-3+',
+			'16'=>	 'CUR WAS 120-2+',
+			'17'=>	 'CUR WAS 150-2+',
+			'22'=>	 '60 DAY DEL - 2X',
+			'23'=>	 '60 DAY DEL - 3X',
+			'24'=>	 '60 DAY DEL - 4X+',
+			'25'=>	'DAY DEL - 2X',
+			'26'=>	'DAY DEL - 3X+',
+			'27'=>	 '120 DAY DEL - 2X+',		
+			'28'=>	 'DEL 150 2X+',
+			'29'=>	'WAS 120+',
+			'31'=>	 'CUR WAS 30',
+			'32'=>	 'CUR WAS 30-2',
+			'33'=>	 'CUR WAS 30-3',
+			'34'=>	 'CUR WAS 30-4',
+			'35'=>	 'CUR WAS 30-5',
+			'36'=>	 'CUR WAS 30-6+',
+			'37'=>	 'CUR WAS 60',
+			'38'=>	 'CUR WAS 90',
+			'39'=>	 'CUR WAS 120',
+			'40'=>	 'CUR WAS 150',
+			'41'=>	 'CUR WAS 180',
+			'42'=>	 'REDMD REPO',
+			'43'=>	 'CUR WAS COLL',
+			'45'=>	 'CUR WAS FORE',
+			'71'=>	 '30 DAY DEL',
+			'72'=>	 '30 DAY DEL - 2X',
+			'73'=>	 '30 DAY DEL - 3X',
+			'74'=>	 '30 DAY DEL - 4X',
+			'75'=>	 '30 DAY DEL - 5X',
+			'76'=>	 '30 DAY DEL - 6X+',
+			'77'=>	 '30 WAS 60',
+			'78'=>	 'DEL 60',
+			'79'=>	 'DEL WAS 90',
+			'80'=>	 'DEL 90',
+			'81'=>	 'DEL WAS 120+',
+			'82'=>	'DEL 120',
+			'83'=>	'DEL 150',
+			'84'=>	'DEL 180',
+			'86'=>	'CO NOW PAY'
 
 		],
 	'05'=>[
-
+			'A2'=>	'PAID',
+			'3'=>	'CRCDLOST',
+			'10'=>	'REFINANC',
+			'66'=>	'PDBYDLER',
+			'68'=>	'SETTLED',
+			'87'=>	'FOREPROC',
+			'88'=>	'GOVCLAIM',
+			'89'=>	'DEEDLIEU',
+			'91'=>	'TRMDFAULT',
+			'92'=>	'INSCLAIM',
+			'93'=>	'COLLACCT',
+			'94'=>	'FORECLOS',
+			'95'=>	'VOLUSURR',
+			'96'=>	'REPOSSES',
+			'97'=>	'CHARGOFF'
 		],
 	'10'=>[
-
+			'87'=>	'FOREPROC',
+			'92'=>	'INSCLAIM',
+			'93'=>	'COLLACCT',
+			'95'=>	'VOLUSURR',
+			'96'=>	'REPOSSES',
+			'97'=>	'CHARGOFF'
 		],
 	'66'=>[
-
-		],
+			'91'=>	'TRMDFAULT',
+			'92'=>	'INSCLAIM',
+			'93'=>	'COLLACCT',
+			'95'=>	'VOLUSURR',
+			'96'=>	'REPOSSES',
+			'97'=>	'CHARGOFF'
+		],	
 	'68'=>[
-
+			'87'=>	'FOREPROC',
+			'89'=>	'DEEDLIEU',
+			'91'=>	'TRMDFAULT',
+			'92'=>	'INSCLAIM',
+			'93'=>	'COLLACCT',
+			'94'=>	'FORECLOS',
+			'95'=>	'VOLUSURR',
+			'96'=>	'REPOSSES',
+			'97'=>	'CHARGOFF'
 		],
 	'87'=>[
-
+			'94' => 'FORECLOS'
 		],
 	'88'=>[
-
+			'93'=> 'COLLACCT',
+			'97'=> 'CHARGOFF'
 		],
 	'89'=>[
-
+			'87'=> 'FOREPROC', 
+			'92'=> 'INSCLAIM', 
+			'93'=> 'COLLACCT', 
+			'94'=> 'FORECLOS'
 		],
 	'91'=>[
-
+			'92'=> 'INSCLAIM',
+			'93'=> 'COLLACCT',
+			'95'=> 'VOLUSURR',
+			'96'=> 'REPOSSES'
 		],
 	'92'=>[
-
+			'87'=> 'FOREPROC',
+			'93'=> 'COLLACCT',
+			'97'=> 'CHARGOFF'
 		],
 	'93'=>[
-
+			'95'=> 'VOLUSURR',
+			'96'=> 'REPOSSES',
+			'97'=> 'CHARGOFF'
 		],
 	'94'=>[
-
+			'87'=> 'FOREPROC',
+			'97'=> 'CHARGOFF'
 		],
 	'95'=>[
-
+			'93'=> 'COLLACCT',
+			'96'=> 'REPOSSES',
+			'97'=> 'CHARGOFF'
 		],
 	'96'=>[
-
+			'93'=> 'COLLACCT'
 		],
 	'97'=>[
-
+			'87'=> 'FOREPROC',
+			'88'=> 'GOVCLAIM',
+			'91'=> 'TRMDFAULT',
+			'92'=> 'INSCLAIM',
+			'93'=> 'COLLACCT',
+			'94'=> 'FORECLOS',
+			'95'=> 'VOLUSURR',
+			'96'=> 'REPOSSES',
 		],
 	'CODE1'=>[
-
+			'07'=> 'CUR WAS 60-2', 
+			'08'=> 'CUR WAS 60-3',
+			'09'=> 'CUR WAS 60-4+',
+			'11'=> 'CUR ACCT ',
+			'14'=> 'CUR WAS 90-2 ',
+			'15'=> 'CUR WAS 90-3+ ',
+			'16'=> 'CUR WAS 120-2+ ',
+			'17'=> 'CUR WAS 150-2+ ',
+			'22'=> '60 DAY DEL - 2X ',
+			'23'=> '60 DAY DEL - 3X ',
+			'24'=> '60 DAY DEL - 4X+ ',
+			'25'=> '90 DAY DEL - 2X ',
+			'26'=> '90 DAY DEL - 3X+ ',
+			'27'=> '120 DAY DEL - 2X+ ',
+			'28'=> 'DEL 150 2X+ ',
+			'29'=> '90 WAS 120+ ',
+			'31'=> 'CUR WAS 30 ',
+			'32'=> 'CUR WAS 30-2 ',
+			'33'=> 'CUR WAS 30-3 ',
+			'34'=> 'CUR WAS 30-4 ',
+			'35'=> 'CUR WAS 30-5 ',
+			'36'=> 'CUR WAS 30-6+ ',
+			'37'=> 'CUR WAS 60 ',
+			'38'=> 'CUR WAS 90 ',
+			'39'=> 'CUR WAS 120 ',
+			'40'=> 'CUR WAS 150 ',
+			'41'=> 'CUR WAS 180 ',
+			'42'=> 'REDMD REPO ',
+			'43'=> 'CUR WAS COLL ',
+			'45'=> 'CUR WAS FORE ',
+			'71'=> '30 DAY DEL 71 ',
+			'72'=> '30 DAY DEL - 2X 72',
+			'73'=> '30 DAY DEL - 3X 73',
+			'74'=> '30 DAY DEL - 4X 74',
+			'75'=> '30 DAY DEL - 5X 75',
+			'76'=> '30 DAY DEL - 6X+ 7',
+			'77'=> '30 WAS 60 77',
+			'78'=> 'DEL 60',
+			'79'=> 'DEL WAS 90',
+			'80'=> 'DEL 90',
+			'81'=> 'DEL WAS 120+',
+			'82'=> 'DEL 120',
+			'83'=> 'DEL 150',
+			'84'=> 'DEL 180',
+			'86'=> 'CO NOW PAY'
 		],
 ];
 ?>

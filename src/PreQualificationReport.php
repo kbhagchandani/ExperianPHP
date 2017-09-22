@@ -263,6 +263,19 @@ class PreQualificationReport {
 				self::mapValues($report['Inquiry'],$codeMaps,'Inquiry');
 			}
 		}
+		if(isset($report['FraudServices'])) {
+			require_once(__DIR__."/CodeMaps/SIC.php");
+			require_once(__DIR__."/CodeMaps/FraudShieldIndicators.php");
+			$codeMaps=['sic'=>$sic,'fraudShieldIndicators'=>$fraudShieldIndicators];
+			if(isset($report['FraudServices'][0])){
+				$inquiries=count($report['FraudServices']);
+				for($i=0;$i<$inquiries;$i++){
+					self::mapValues($report['FraudServices'][$i],$codeMaps,'FraudServices');
+				}
+			} else {
+				self::mapValues($report['FraudServices'],$codeMaps,'FraudServices');
+			}
+		}
 		return $report;
 	}
 
@@ -286,6 +299,13 @@ class PreQualificationReport {
 			case 'Inquiry':
 				$target['KOB']['description']=$source['kindOfBusiness'][sprintf('%02s',$target['KOB']['code'])];
 				$target['Type']['description']=$source['accountPurpose'][sprintf('%02s',$target['Type']['code'])];
+			break;
+			case 'FraudServices':
+				$target['SIC']['description']=$source['sic'][$target['SIC']['code']];
+				foreach($target['Indicator'] as $indicator){
+					$target['Indicators'][$indicator]=$source['fraudShieldIndicators'][$indicator];
+				}
+				unset($target['Indicator']);
 			break;
 		}
 	}
