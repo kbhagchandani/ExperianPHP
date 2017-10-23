@@ -282,13 +282,14 @@ class PreQualificationReport {
 	private static function mapValues(&$target,$source,$type){
 		switch($type){
 			case 'RiskModel':
-				$modelCode=$source[$target['ModelIndicator']['code']];
-				require(__DIR__."/CodeMaps/ModelCodeFactors/{$modelCode}.php");
-				$target['ScoreFactors']=[];
-				foreach(['ScoreFactorCodeOne','ScoreFactorCodeTwo','ScoreFactorCodeThree','ScoreFactorCodeFour'] as $codeFactor){
-					$code=sprintf('%02s',$target[$codeFactor]);
-					$target['ScoreFactors'][$code]=$codeMap[$code];
-					unset($target[$codeFactor]);
+				if($target['ScoreFactorCodeOne'] ?? false){
+					$modelCode=$source[$target['ModelIndicator']['code']];
+					require(__DIR__."/CodeMaps/ModelCodeFactors/{$modelCode}.php");
+					$target['ScoreFactors']=[];
+					foreach(['ScoreFactorCodeOne','ScoreFactorCodeTwo','ScoreFactorCodeThree','ScoreFactorCodeFour'] as $index=>$codeFactor){
+						$code=sprintf('%02s',$target[$codeFactor]);
+						unset($target[$codeFactor]);
+					}
 				}
 			break;
 			case 'TradeLine':
@@ -303,7 +304,7 @@ class PreQualificationReport {
 			case 'FraudServices':
 				$target['SIC']['description']=$source['sic'][$target['SIC']['code']];
 				foreach($target['Indicator'] as $indicator){
-					$target['Indicators'][$indicator]=$source['fraudShieldIndicators'][$indicator];
+					$target['Indicators'][$indicator]=$source['fraudShieldIndicators'][sprintf('%02s',$indicator)];
 				}
 				unset($target['Indicator']);
 			break;
