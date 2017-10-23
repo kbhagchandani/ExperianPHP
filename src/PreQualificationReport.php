@@ -288,6 +288,7 @@ class PreQualificationReport {
 					$target['ScoreFactors']=[];
 					foreach(['ScoreFactorCodeOne','ScoreFactorCodeTwo','ScoreFactorCodeThree','ScoreFactorCodeFour'] as $index=>$codeFactor){
 						$code=sprintf('%02s',$target[$codeFactor]);
+						$target['ScoreFactors'][$code]=$codeMap[$code];
 						unset($target[$codeFactor]);
 					}
 				}
