@@ -263,6 +263,17 @@ class PreQualificationReport {
 				self::mapValues($report['Inquiry'],$codeMaps,'Inquiry');
 			}
 		}
+		if(isset($report['Error'])) {
+			require_once(__DIR__."/CodeMaps/error.php");
+			if(isset($report['Error'][0])){
+				$errors=count($report['Error']);
+				for($i=0;$i<$errors;$i++){
+					self::mapValues($report['Error'][$i],$experionErrors,'Error');
+				}
+			} else {
+				self::mapValues($report['Error'],$experionErrors,'Error');
+			}
+		}
 		if(isset($report['FraudServices'])) {
 			require_once(__DIR__."/CodeMaps/SIC.php");
 			require_once(__DIR__."/CodeMaps/FraudShieldIndicators.php");
@@ -308,6 +319,9 @@ class PreQualificationReport {
 					$target['Indicators'][$indicator]=$source['fraudShieldIndicators'][sprintf('%02s',$indicator)];
 				}
 				unset($target['Indicator']);
+			break;
+			case 'Error':
+				$target['ErrorDescription']=$source[sprintf('%03s',$target['ErrorCode'])];
 			break;
 		}
 	}
