@@ -152,7 +152,6 @@ $paymentStatus=[
 			'83'=>	'DEL 150',
 			'84'=>	'DEL 180',
 			'86'=>	'CO NOW PAY'
-
 		],
 	'05'=>[
 			'A2'=>	'PAID',

@@ -215,9 +215,9 @@ class PreQualificationReport {
 		$products=$response->getProducts();
 		if(isset($products['CreditProfile'])){
 			$report=$products['CreditProfile'];
-			if(isset($report['InformationalMessage']['MessageNumber']) && $report['InformationalMessage']['MessageNumber']=='07'){
-				throw new NoSuchRecordException;
-			}
+			// if(isset($report['InformationalMessage']['MessageNumber']) && $report['InformationalMessage']['MessageNumber']=='07'){
+			// 	throw new NoSuchRecordException;
+			// }
 			return $report;
 		} else {
 			return $report;
@@ -295,7 +295,13 @@ class PreQualificationReport {
 			case 'RiskModel':
 				if($target['ScoreFactorCodeOne'] ?? false){
 					$modelCode=$source[$target['ModelIndicator']['code']];
-					require(__DIR__."/CodeMaps/ModelCodeFactors/{$modelCode}.php");
+					if(empty($modelCode)){
+						$modelCode=$source['AF'];
+					}
+					$target['ModelIndicator']['name']=$modelCode['name'];
+					$target['ModelIndicator']['range']=$modelCode['range'];
+					$target['ModelIndicator']['mapFile']=$modelCode['mapFile'];
+					require(__DIR__."/CodeMaps/ModelCodeFactors/{$modelCode['mapFile']}.php");
 					$target['ScoreFactors']=[];
 					foreach(['ScoreFactorCodeOne','ScoreFactorCodeTwo','ScoreFactorCodeThree','ScoreFactorCodeFour'] as $index=>$codeFactor){
 						$code=sprintf('%02s',$target[$codeFactor]);
@@ -303,6 +309,7 @@ class PreQualificationReport {
 						unset($target[$codeFactor]);
 					}
 				}
+				// Need to handle Risk Model (Page 52) Exclusion Codes
 			break;
 			case 'TradeLine':
 				$target['EnhancedPaymentData']['AccountCondition']['description']=$source['accountConditions'][sprintf('%02s',$target['EnhancedPaymentData']['AccountCondition']['code'])];
