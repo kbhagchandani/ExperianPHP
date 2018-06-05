@@ -25,4 +25,4 @@ This project is based on NetConnect Api form Experian USA.
 Copyright (c) 2016-2018 Kapil Bhagchandani.
 See [LICENSE][] for details.
 
-[license]: LICENSE.txt
+[license]: LICENSE
