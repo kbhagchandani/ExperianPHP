@@ -5,8 +5,8 @@
  *	Page No: 63
  */
 $sic=[
-	'C00000'=> 'Reported: Cautious Address',
-	'U00000'=> 'Undetermined address type on file',
+	'C0000000'=> 'Reported: Cautious Address',
+	'U0000000'=> 'Undetermined address type on file',
 	'35790100'=> 'NUMBERING MACHINES (MFRS)',
 	'35792000'=> 'NUMBER ISSUING SYSTEMS (MFRS)',
 	'40110100'=> 'RAILROADS',
