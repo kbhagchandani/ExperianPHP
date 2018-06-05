@@ -16,12 +16,12 @@ class Response{
 	public function __construct($psr7Response,&$log,$parseXML=false,$logIO=false){
 		$this->rawResponse=$psr7Response;
 		$this->log=$log;
+		$responseBody=$this->rawResponse->getBody()->getContents();
 		if($logIO){
 			$this->log->info("Experian NetConnectTransaction Response : $responseBody");
 		}
 		switch($this->rawResponse->getStatusCode()){
 			case 200:
-				$responseBody=$this->rawResponse->getBody()->getContents();
 				if($parseXML){
 					$this->responseData=XML::decode($responseBody);
 					if(isset($this->responseData['ErrorMessage'])) {
