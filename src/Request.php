@@ -111,7 +111,7 @@ class Request{
 		if($this->loadedSystemConfig['logIO'] ?? false){
 			$this->log->info("Experian NetConnectTransaction Request : $xml");
 		}
-		$response=new Response($response,$this->log,true);
+		$response=new Response($response,$this->log,true,($this->loadedSystemConfig['logIO']??false));
 		return $response;
 	}
 
@@ -142,21 +142,25 @@ class Request{
 				"application"=>"netconnect"
 			]
 		]);
-		$response=new Response($response,$this->log);
+		$response=new Response($response,$this->logtrue,false,($this->loadedSystemConfig['logIO']??false));
 		$newPassword=$response->getHeader('Response');
 		$this->log->info("New Password received: $newPassword");
+		$request=[
+				"newpassword"=>$newPassword,
+				"command"=>"resetpassword",
+				"application"=>"netconnect"
+			];
 		$response = $this->client->request('POST',"https://ss3.experian.com/securecontrol/reset/passwordreset",[
 			'http_errors' => false,
 			'verify' => true,
 			// 'debug'=> true,
 			'auth' => [$this->config['username'], $this->config['password']],
-			'form_params' => [
-				"newpassword"=>$newPassword,
-				"command"=>"resetpassword",
-				"application"=>"netconnect"
-			]
+			'form_params' => $request
 		]);
-		$response=new Response($response,$this->log);
+		if($this->loadedSystemConfig['logIO'] ?? false){
+			$this->log->info("Experian Password Update Request : ".json_encode($request));
+		}
+		$response=new Response($response,$this->log,false,($this->loadedSystemConfig['logIO']??false));
 		if($response->getHeader('Response')!="SUCCESS")
 			throw new \Exception($response);
 
