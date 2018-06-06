@@ -3,6 +3,10 @@ PHP wrapper for Experian Netconnect API.
 
 This project is based on NetConnect Api form Experian USA.
 
+## NetConnect Products Implemented
+
+* FICO
+
 ## Prequists
 * PHP 7.1 with following enabled
 	* OpenSSL
@@ -11,6 +15,8 @@ This project is based on NetConnect Api form Experian USA.
 	* Curl
 * Composer
 * Access Credentials from [Experian](https://www.experian.com/connect/api/#contact)
+
+## Implementing
 
 ## Contributing
 
