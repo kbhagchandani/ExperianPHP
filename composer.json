@@ -3,12 +3,12 @@
 	"description": "PHP wrapper for Experian NetConnect API",
 	"keywords": ["Experian","Experian NetConnect API","Experian PHP Client","Experian PHP SDK"],
 	"homepage": "https://github.com/kbhagchandani/ExperianPHP",
-	"license": "GPL v3",
+	"license": "GPL-3.0-only",
 	"type": "library",
 	"autoload": {
 		"psr-4": {
 			"Experian\\": "src/",
-			"Experian\\Exceptions": "src/Exceptions/"
+			"Experian\\Exceptions\\": "src/Exceptions/"
 		}
 	},
 	"authors": [
